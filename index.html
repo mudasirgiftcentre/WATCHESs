@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXE WATCH | Premium Watch Store</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+ font-family:Arial,sans-serif;
+ background:#0b0b0b;color:#fff;
+}
+header{
+ background:#111;padding:22px 7%;
+ display:flex;justify-content:space-between;
+ align-items:center;border-bottom:1px solid #333;
+ position:sticky;top:0;z-index:10;
+}
+.logo{font-size:25px;font-weight:bold;color:#d4af37;letter-spacing:2px}
+header button,.btn{
+ background:#d4af37;color:#111;border:0;
+ padding:11px 18px;border-radius:5px;
+ font-weight:bold;cursor:pointer;
+}
+.hero{
+ text-align:center;padding:65px 15px;
+ background:linear-gradient(120deg,#191919,#30250e);
+}
+.hero h1{font-size:42px;color:#d4af37;margin-bottom:15px}
+.hero p{color:#ccc}
+.container{padding:35px 7%}
+.filters{
+ display:flex;gap:12px;flex-wrap:wrap;margin-bottom:25px
+}
+input,select,textarea{
+ padding:12px;border:1px solid #555;
+ background:#181818;color:white;
+ border-radius:5px;width:100%;
+}
+.filters input{flex:2;min-width:180px}
+.filters select{flex:1;min-width:150px}
+.grid{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+ gap:22px;
+}
+.card{
+ background:#171717;border:1px solid #333;
+ border-radius:10px;overflow:hidden;
+ transition:.2s;
+}
+.card:hover{transform:translateY(-5px);border-color:#d4af37}
+.card img{
+ width:100%;height:230px;object-fit:cover;
+ background:#222;
+}
+.info{padding:16px}
+.brand{color:#d4af37;font-size:13px;font-weight:bold}
+.info h3{margin:9px 0}
+.price{font-size:20px;color:#d4af37;font-weight:bold}
+.status{color:#ff6969;font-size:13px;margin-top:8px}
+.card button{margin-top:12px}
+.admin{
+ display:none;background:#151515;
+ padding:25px;border:1px solid #d4af37;
+ border-radius:10px;margin-bottom:30px;
+}
+.admin h2{color:#d4af37;margin-bottom:20px}
+.form-grid{
+ display:grid;grid-template-columns:1fr 1fr;
+ gap:13px;margin-bottom:15px;
+}
+.full{grid-column:1/-1}
+.admin-actions{display:flex;gap:10px;flex-wrap:wrap}
+.admin-list{margin-top:25px}
+.admin-row{
+ display:flex;justify-content:space-between;
+ align-items:center;gap:10px;
+ padding:12px 0;border-bottom:1px solid #444;
+}
+.danger{background:#a52a2a!important;color:white!important}
+.secondary{background:#444!important;color:white!important}
+footer{
+ text-align:center;padding:30px;color:#999;
+ border-top:1px solid #333;margin-top:40px;
+}
+.modal{
+ display:none;position:fixed;inset:0;
+ background:#000c;z-index:30;
+ align-items:center;justify-content:center;padding:15px;
+}
+.modal-box{
+ background:#191919;padding:25px;
+ border:1px solid #d4af37;border-radius:10px;
+ width:100%;max-width:400px;
+}
+.modal-box h2{color:#d4af37;margin-bottom:20px}
+.modal-box input{margin-bottom:12px}
+@media(max-width:600px){
+ .hero h1{font-size:30px}
+ .form-grid{grid-template-columns:1fr}
+ .full{grid-column:auto}
+ header{padding:17px 4%}
+ .logo{font-size:19px}
+ .container{padding:25px 4%}
+ .admin-row{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">LUXE WATCH</div>
+ <button onclick="showLogin()">Admin Login</button>
+</header>
+
+<section class="hero">
+ <h1>TIMELESS ELEGANCE</h1>
+ <p>Discover Your Perfect Watch. Style That Never Ends.</p>
+</section>
+
+<div class="container">
+
+<!-- ADMIN PANEL -->
+<section class="admin" id="adminPanel">
+ <h2>⚙ ADMIN DASHBOARD</h2>
+
+ <div class="form-grid">
+  <input id="brand" placeholder="Watch Brand (e.g. Rolex)">
+  <input id="model" placeholder="Watch Model">
+  <input id="price" type="number" placeholder="Price (PKR)">
+  <input id="image" type="file" accept="image/*">
+  <textarea id="description" class="full"
+   placeholder="Watch description"></textarea>
+ </div>
+
+ <div class="admin-actions">
+  <button class="btn" onclick="saveProduct()">Save Product</button>
+  <button class="btn secondary" onclick="clearForm()">Clear Form</button>
+  <button class="btn secondary" onclick="logout()">Logout</button>
+ </div>
+
+ <div class="admin-list">
+  <h3>Manage Products</h3>
+  <div id="manageList"></div>
+ </div>
+</section>
+
+<h2 style="color:#d4af37;margin-bottom:20px">OUR COLLECTION</h2>
+
+<div class="filters">
+ <input id="search" placeholder="Search watch or brand..."
+  oninput="render()">
+ <select id="brandFilter" onchange="render()">
+  <option value="">All Brands</option>
+ </select>
+ <select id="sort" onchange="render()">
+  <option value="">Default sorting</option>
+  <option value="low">Price: Low to High</option>
+  <option value="high">Price: High to Low</option>
+ </select>
+</div>
+
+<div class="grid" id="products"></div>
+<p id="empty" style="display:none;text-align:center;color:#aaa;padding:35px">
+ No watches found. Add products from Admin Dashboard.
+</p>
+
+</div>
+
+<footer>
+ © 2026 LUXE WATCH | All Rights Reserved
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+ <div class="modal-box">
+  <h2>Admin Login</h2>
+  <input id="password" type="password" placeholder="Enter Admin Password">
+  <button class="btn" onclick="login()">Login</button>
+  <button class="btn secondary" onclick="closeLogin()">Cancel</button>
+  <p id="loginError" style="color:red;margin-top:12px"></p>
+ </div>
+</div>
+
+<script>
+
+// CHANGE YOUR ADMIN PASSWORD HERE
+const ADMIN_PASSWORD = "1234";
+
+let products = JSON.parse(localStorage.getItem("watchProducts") || "[]");
+let editingId = null;
+let adminActive = false;
+
+function saveData(){
+ try{
+  localStorage.setItem("watchProducts",JSON.stringify(products));
+ }catch(e){
+  alert("Storage full! Try using smaller watch images.");
+ }
+}
+
+function showLogin(){
+ document.getElementById("loginModal").style.display="flex";
+}
+
+function closeLogin(){
+ document.getElementById("loginModal").style.display="none";
+}
+
+function login(){
+ const pass=document.getElementById("password").value;
+ if(pass===ADMIN_PASSWORD){
+  adminActive=true;
+  closeLogin();
+  document.getElementById("adminPanel").style.display="block";
+  render();
+ }else{
+  document.getElementById("loginError").innerText="Incorrect Password!";
+ }
+}
+
+function logout(){
+ adminActive=false;
+ document.getElementById("adminPanel").style.display="none";
+ clearForm();
+}
+
+function clearForm(){
+ editingId=null;
+ ["brand","model","price","description","image"].forEach(id=>{
+  document.getElementById(id).value="";
+ });
+}
+
+function saveProduct(){
+ if(!adminActive)return;
+
+ const brand=document.getElementById("brand").value.trim();
+ const model=document.getElementById("model").value.trim();
+ const price=Number(document.getElementById("price").value);
+ const description=document.getElementById("description").value.trim();
+ const file=document.getElementById("image").files[0];
+
+ if(!brand||!model||!price||price<0){
+  alert("Please enter brand, model and valid price.");
+  return;
+ }
+
+ if(file && file.size>1500000){
+  alert("Image is too large. Please choose an image under 1.5 MB.");
+  return;
+ }
+
+ function finish(image){
+  const existing=products.find(p=>p.id===editingId);
+
+  const product={
+   id:editingId || Date.now().toString(),
+   brand,model,price,description,
+   image:image || (existing ? existing.image : ""),
+   sold:existing ? existing.sold : false
+  };
+
+  if(editingId){
+   products=products.map(p=>p.id===editingId?product:p);
+  }else{
+   products.push(product);
+  }
+
+  saveData();
+  clearForm();
+  render();
+  alert("Product saved successfully!");
+ }
+
+ if(file){
+  const reader=new FileReader();
+  reader.onload=e=>finish(e.target.result);
+  reader.readAsDataURL(file);
+ }else{
+  finish("");
+ }
+}
+
+function editProduct(id){
+ if(!adminActive)return;
+ const p=products.find(x=>x.id===id);
+ if(!p)return;
+
+ editingId=id;
+ document.getElementById("brand").value=p.brand;
+ document.getElementById("model").value=p.model;
+ document.getElementById("price").value=p.price;
+ document.getElementById("description").value=p.description;
+ document.getElementById("image").value="";
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteProduct(id){
+ if(!adminActive)return;
+ if(confirm("Delete this watch permanently?")){
+  products=products.filter(p=>p.id!==id);
+  saveData();
+  render();
+ }
+}
+
+function toggleSold(id){
+ if(!adminActive)return;
+ products=products.map(p=>
+  p.id===id?{...p,sold:!p.sold}:p
+ );
+ saveData();
+ render();
+}
+
+function render(){
+ const search=document.getElementById("search").value.toLowerCase();
+ const filter=document.getElementById("brandFilter").value;
+ const sort=document.getElementById("sort").value;
+
+ let brands=[...new Set(products.map(p=>p.brand))];
+ const select=document.getElementById("brandFilter");
+ const old=select.value;
+
+ select.innerHTML='<option value="">All Brands</option>';
+ brands.forEach(b=>{
+  const opt=document.createElement("option");
+  opt.value=b;opt.textContent=b;
+  select.appendChild(opt);
+ });
+ select.value=brands.includes(old)?old:"";
+
+ let list=products.filter(p=>
+  (p.brand.toLowerCase().includes(search) ||
+   p.model.toLowerCase().includes(search)) &&
+  (!filter||p.brand===filter)
+ );
+
+ if(sort==="low")list.sort((a,b)=>a.price-b.price);
+ if(sort==="high")list.sort((a,b)=>b.price-a.price);
+
+ const grid=document.getElementById("products");
+ grid.innerHTML="";
+
+ document.getElementById("empty").style.display=list.length?"none":"block";
+
+ list.forEach(p=>{
+  const card=document.createElement("div");
+  card.className="card";
+
+  const img=document.createElement("img");
+  img.src=p.image || "https://placehold.co/500x400/222/d4af37?text=WATCH";
+  img.alt=p.brand+" "+p.model;
+
+  const info=document.createElement("div");
+  info.className="info";
+
+  const brand=document.createElement("div");
+  brand.className="brand";
+  brand.textContent=p.brand;
+
+  const title=document.createElement("h3");
+  title.textContent=p.model;
+
+  const price=document.createElement("div");
+  price.className="price";
+  price.textContent="Rs. "+Number(p.price).toLocaleString("en-PK");
+
+  const desc=document.createElement("p");
+  desc.style.color="#aaa";
+  desc.style.marginTop="9px";
+  desc.textContent=p.description || "";
+
+  info.append(brand,title,price,desc);
+
+  if(p.sold){
+   const status=document.createElement("div");
+   status.className="status";
+   status.textContent="SOLD OUT";
+   info.append(status);
+  }
+
+  grid.append(card);
+  card.append(img,info);
+ });
+
+ const manage=document.getElementById("manageList");
+ manage.innerHTML="";
+
+ if(adminActive){
+  products.forEach(p=>{
+   const row=document.createElement("div");
+   row.className="admin-row";
+
+   const name=document.createElement("strong");
+   name.textContent=p.brand+" - "+p.model+" | Rs. "+p.price;
+
+   const actions=document.createElement("div");
+
+   const edit=document.createElement("button");
+   edit.className="btn";
+   edit.textContent="Edit";
+   edit.onclick=()=>editProduct(p.id);
+
+   const sold=document.createElement("button");
+   sold.className="btn secondary";
+   sold.textContent=p.sold?"Available":"Sold Out";
+   sold.style.marginLeft="5px";
+   sold.onclick=()=>toggleSold(p.id);
+
+   const del=document.createElement("button");
+   del.className="btn danger";
+   del.textContent="Delete";
+   del.style.marginLeft="5px";
+   del.onclick=()=>deleteProduct(p.id);
+
+   actions.append(edit,sold,del);
+   row.append(name,actions);
+   manage.append(row);
+  });
+ }
+}
+
+render();
+
+</script>
+</body>
+</html>
